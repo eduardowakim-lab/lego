@@ -107,6 +107,8 @@ let imageState = {
 };
 let activeImagePart = null;
 let activeDrag = null;
+let activePointers = new Map();
+let activeGesture = null;
 
 const printSizes = {
   shirt: {
@@ -115,6 +117,15 @@ const printSizes = {
     heightMm: 12.21,
   },
 };
+
+function isMobileLayout() {
+  return window.matchMedia('(max-width: 780px)').matches;
+}
+
+function closeEditorOnMobileChoice() {
+  if (!isMobileLayout()) return;
+  window.setTimeout(() => editorPopover.classList.add('hidden'), 80);
+}
 
 function selectPart(part) {
   selectedPart = part;
@@ -151,7 +162,7 @@ function openEditor(part, event) {
 
   editorPopover.classList.remove('hidden');
 
-  if (!event || window.matchMedia('(max-width: 780px)').matches) return;
+  if (!event || isMobileLayout()) return;
 
   const stageRect = document.querySelector('#stage').getBoundingClientRect();
   const clickX = event.clientX - stageRect.left;
@@ -301,6 +312,8 @@ function selectImageForTransform(part) {
 function hideTransformControls() {
   activeImagePart = null;
   activeDrag = null;
+  activePointers.clear();
+  activeGesture = null;
   transformControls.classList.add('hidden');
 }
 
@@ -371,12 +384,66 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function pointerPairMetrics() {
+  const points = Array.from(activePointers.values());
+  if (points.length < 2) return null;
+
+  const [first, second] = points;
+  const center = {
+    x: (first.x + second.x) / 2,
+    y: (first.y + second.y) / 2,
+  };
+
+  return {
+    center,
+    distance: Math.max(pointerDistance(first, second), 1),
+    angle: pointerAngle(second, first),
+  };
+}
+
+function startGestureDrag() {
+  if (!activeImagePart) return;
+
+  const metrics = pointerPairMetrics();
+  if (!metrics) return;
+
+  const state = imageState[activeImagePart];
+  activeGesture = {
+    startCenter: metrics.center,
+    startDistance: metrics.distance,
+    startAngle: metrics.angle,
+    startX: state.x,
+    startY: state.y,
+    startScale: state.scale,
+    startRotate: state.rotate,
+  };
+  activeDrag = null;
+}
+
 function startTransformDrag(event, mode) {
   if (!activeImagePart) return;
   event.preventDefault();
   event.stopPropagation();
 
   const point = svgPoint(event);
+  if (mode === 'move') {
+    activePointers.set(event.pointerId, point);
+  } else {
+    activePointers.clear();
+    activeGesture = null;
+  }
+
+  try {
+    event.currentTarget.setPointerCapture(event.pointerId);
+  } catch (error) {
+    // Some mobile browsers skip capture for a second touch; the SVG listener still receives moves.
+  }
+
+  if (mode === 'move' && activePointers.size >= 2) {
+    startGestureDrag();
+    return;
+  }
+
   const state = imageState[activeImagePart];
   const center = imageCenter(activeImagePart);
   activeDrag = {
@@ -391,15 +458,36 @@ function startTransformDrag(event, mode) {
     startAngle: pointerAngle(point, center),
     center,
   };
-
-  event.currentTarget.setPointerCapture(event.pointerId);
 }
 
 function updateTransformDrag(event) {
-  if (!activeDrag || event.pointerId !== activeDrag.pointerId || !activeImagePart) return;
+  if (!activeImagePart) return;
   event.preventDefault();
 
   const point = svgPoint(event);
+  if (activePointers.has(event.pointerId)) {
+    activePointers.set(event.pointerId, point);
+  }
+
+  if (activePointers.size >= 2) {
+    if (!activeGesture) {
+      startGestureDrag();
+    }
+
+    const metrics = pointerPairMetrics();
+    if (!activeGesture || !metrics) return;
+
+    const state = imageState[activeImagePart];
+    state.x = activeGesture.startX + metrics.center.x - activeGesture.startCenter.x;
+    state.y = activeGesture.startY + metrics.center.y - activeGesture.startCenter.y;
+    state.scale = clamp(activeGesture.startScale * (metrics.distance / activeGesture.startDistance), 0.35, 3);
+    state.rotate = activeGesture.startRotate + metrics.angle - activeGesture.startAngle;
+    applyImageTransform(activeImagePart);
+    return;
+  }
+
+  if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
+
   const state = imageState[activeImagePart];
 
   if (activeDrag.mode === 'move') {
@@ -421,8 +509,32 @@ function updateTransformDrag(event) {
 }
 
 function stopTransformDrag(event) {
-  if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
-  activeDrag = null;
+  activePointers.delete(event.pointerId);
+  if (activeGesture && activePointers.size < 2) {
+    activeGesture = null;
+    const remainingPointer = activePointers.entries().next().value;
+    if (remainingPointer && activeImagePart) {
+      const [pointerId, point] = remainingPointer;
+      const state = imageState[activeImagePart];
+      const center = imageCenter(activeImagePart);
+      activeDrag = {
+        mode: 'move',
+        pointerId,
+        startPoint: point,
+        startX: state.x,
+        startY: state.y,
+        startScale: state.scale,
+        startRotate: state.rotate,
+        startDistance: Math.max(pointerDistance(point, center), 1),
+        startAngle: pointerAngle(point, center),
+        center,
+      };
+    }
+  }
+
+  if (activeDrag && event.pointerId === activeDrag.pointerId) {
+    activeDrag = null;
+  }
 }
 
 function printStickerSvg(part) {
@@ -562,7 +674,10 @@ swatchColors.forEach((color) => {
   button.dataset.color = color;
   button.style.background = color;
   button.setAttribute('aria-label', `Usar cor ${color}`);
-  button.addEventListener('click', () => setPantsColor(color));
+  button.addEventListener('click', () => {
+    setPantsColor(color);
+    closeEditorOnMobileChoice();
+  });
   swatches.appendChild(button);
 
   const waistButton = document.createElement('button');
@@ -571,7 +686,10 @@ swatchColors.forEach((color) => {
   waistButton.dataset.color = color;
   waistButton.style.background = color;
   waistButton.setAttribute('aria-label', `Usar cor ${color} na cintura`);
-  waistButton.addEventListener('click', () => setWaistColor(color));
+  waistButton.addEventListener('click', () => {
+    setWaistColor(color);
+    closeEditorOnMobileChoice();
+  });
   waistSwatches.appendChild(waistButton);
 
   const feetButton = document.createElement('button');
@@ -580,7 +698,10 @@ swatchColors.forEach((color) => {
   feetButton.dataset.color = color;
   feetButton.style.background = color;
   feetButton.setAttribute('aria-label', `Usar cor ${color} nos pes`);
-  feetButton.addEventListener('click', () => setFeetColor(color));
+  feetButton.addEventListener('click', () => {
+    setFeetColor(color);
+    closeEditorOnMobileChoice();
+  });
   feetSwatches.appendChild(feetButton);
 
   const armButton = document.createElement('button');
@@ -589,7 +710,10 @@ swatchColors.forEach((color) => {
   armButton.dataset.color = color;
   armButton.style.background = color;
   armButton.setAttribute('aria-label', `Usar cor ${color} na manga curta`);
-  armButton.addEventListener('click', () => setArmsColor(color));
+  armButton.addEventListener('click', () => {
+    setArmsColor(color);
+    closeEditorOnMobileChoice();
+  });
   armSwatches.appendChild(armButton);
 });
 
@@ -601,10 +725,26 @@ pantsPicker.addEventListener('input', (event) => setPantsColor(event.target.valu
 waistPicker.addEventListener('input', (event) => setWaistColor(event.target.value));
 feetPicker.addEventListener('input', (event) => setFeetColor(event.target.value));
 armsPicker.addEventListener('input', (event) => setArmsColor(event.target.value));
-pantsModeButton.addEventListener('click', () => setPantsMode('pants'));
-shortsModeButton.addEventListener('click', () => setPantsMode('shorts'));
-shortSleeveButton.addEventListener('click', () => setSleeveMode('short'));
-longSleeveButton.addEventListener('click', () => setSleeveMode('long'));
+pantsPicker.addEventListener('change', closeEditorOnMobileChoice);
+waistPicker.addEventListener('change', closeEditorOnMobileChoice);
+feetPicker.addEventListener('change', closeEditorOnMobileChoice);
+armsPicker.addEventListener('change', closeEditorOnMobileChoice);
+pantsModeButton.addEventListener('click', () => {
+  setPantsMode('pants');
+  closeEditorOnMobileChoice();
+});
+shortsModeButton.addEventListener('click', () => {
+  setPantsMode('shorts');
+  closeEditorOnMobileChoice();
+});
+shortSleeveButton.addEventListener('click', () => {
+  setSleeveMode('short');
+  closeEditorOnMobileChoice();
+});
+longSleeveButton.addEventListener('click', () => {
+  setSleeveMode('long');
+  closeEditorOnMobileChoice();
+});
 shirtUpload.addEventListener('change', (event) => readUpload(event.target.files[0], 'shirt'));
 faceUpload.addEventListener('change', (event) => readUpload(event.target.files[0], 'face'));
 
