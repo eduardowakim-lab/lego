@@ -491,7 +491,7 @@ function updateTransformDrag(event) {
     const state = imageState[activeImagePart];
     state.x = activeGesture.startX + metrics.center.x - activeGesture.startCenter.x;
     state.y = activeGesture.startY + metrics.center.y - activeGesture.startCenter.y;
-    state.scale = clamp(activeGesture.startScale * (metrics.distance / activeGesture.startDistance), 0.35, 2.4);
+    state.scale = clamp(activeGesture.startScale * (metrics.distance / activeGesture.startDistance), 0.35, 40);
     state.rotate = activeGesture.startRotate + metrics.angle - activeGesture.startAngle;
     applyImageTransform(activeImagePart);
     return;
@@ -508,7 +508,7 @@ function updateTransformDrag(event) {
 
   if (activeDrag.mode === 'scale') {
     const distance = pointerDistance(point, activeDrag.center);
-    state.scale = clamp(activeDrag.startScale * (distance / activeDrag.startDistance), 0.35, 2.4);
+    state.scale = clamp(activeDrag.startScale * (distance / activeDrag.startDistance), 0.35, 40);
   }
 
   if (activeDrag.mode === 'rotate') {
