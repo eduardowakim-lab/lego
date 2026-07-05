@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Personalizador Lego</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="workspace" aria-label="Personalizador de boneco Lego">
+        <div class="topbar">
+          <div>
+            <h1>Personalize seu Lego</h1>
+            <p>Clique na calca, cintura, pes, mangas, camiseta ou rosto para editar.</p>
+          </div>
+          <div class="top-actions">
+            <button class="ghost-button" id="savePdfButton" type="button">Salvar PDF</button>
+            <button class="ghost-button" id="resetButton" type="button">Resetar</button>
+          </div>
+        </div>
+
+        <div class="customizer">
+          <div class="stage" id="stage">
+            <svg class="figure-svg" viewBox="0 0 640 900" role="img" aria-label="Boneco estilo minifigura personalizavel">
+              <defs>
+                <linearGradient id="plasticYellow" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#ffe66d" />
+                  <stop offset="0.55" stop-color="#ffc928" />
+                  <stop offset="1" stop-color="#f2a900" />
+                </linearGradient>
+                <linearGradient id="plasticRed" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#ff4a2f" />
+                  <stop offset="1" stop-color="#c81e10" />
+                </linearGradient>
+                <linearGradient id="shine" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#ffffff" stop-opacity="0.45" />
+                  <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.08" />
+                  <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+                </linearGradient>
+                <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.25" />
+                </filter>
+                <clipPath id="shirtClip">
+                  <path d="M205 300 H435 Q460 300 466 325 L490 545 Q493 575 465 575 H175 Q147 575 150 545 L174 325 Q180 300 205 300 Z" />
+                </clipPath>
+                <clipPath id="faceClip">
+                  <rect x="230" y="112" width="180" height="132" rx="28" ry="28" />
+                </clipPath>
+                <clipPath id="pantsClip">
+                  <path d="M178 575 H462 V632 H178 Z M184 632 H309 V820 H170 V676 Q170 650 184 632 Z M331 632 H456 Q470 650 470 676 V820 H331 Z" />
+                </clipPath>
+              </defs>
+
+              <rect class="scene-bg" x="0" y="0" width="640" height="900" />
+
+              <g filter="url(#softShadow)">
+                <path class="neck" d="M284 248 H356 V306 H284 Z" />
+                <path class="forearm left-forearm" d="M99 453 L164 470 L154 644 L106 629 Q77 618 80 585 L88 492 Q91 470 99 453 Z" />
+                <path class="forearm right-forearm" d="M541 453 Q549 470 552 492 L560 585 Q563 618 534 629 L486 644 L476 470 Z" />
+                <path class="arm left-arm" d="M151 322 Q118 350 105 407 L99 453 L164 470 L194 474 L210 306 Z" />
+                <path class="arm right-arm" d="M489 322 Q522 350 535 407 L541 453 L476 470 L446 474 L430 306 Z" />
+
+                <path id="shirtTint" d="M205 300 H435 Q460 300 466 325 L490 545 Q493 575 465 575 H175 Q147 575 150 545 L174 325 Q180 300 205 300 Z" />
+                <image id="shirtImageSvg" x="150" y="300" width="340" height="275" preserveAspectRatio="xMidYMid meet" clip-path="url(#shirtClip)" opacity="0" />
+                <path class="shirt-shine" d="M205 300 H435 Q460 300 466 325 L490 545 Q493 575 465 575 H175 Q147 575 150 545 L174 325 Q180 300 205 300 Z" />
+
+                <path id="waistColor" d="M178 575 H462 V632 H178 Z" />
+                <path id="pantsColor" d="M184 632 H306 V816 H168 V680 Q168 652 184 632 Z M334 632 H456 Q472 652 472 680 V816 H334 Z" />
+                <path id="shortsColor" d="M184 632 H306 V718 H168 V680 Q168 652 184 632 Z M334 632 H456 Q472 652 472 680 V718 H334 Z" />
+                <path class="lower-legs" d="M168 718 H306 V816 H168 Z M334 718 H472 V816 H334 Z" />
+                <path class="pants-lines" d="M320 632 V816 M178 632 H462 M306 632 L306 816 M334 632 L334 816" />
+                <rect class="shoe" x="146" y="800" width="160" height="60" rx="5" />
+                <rect class="shoe" x="334" y="800" width="160" height="60" rx="5" />
+                <path class="shoe-shine" d="M160 810 H288 M348 810 H476" />
+
+                <path class="hand left-hand" d="M111 604 C82 604 62 626 62 655 C62 686 86 710 119 710 C153 710 178 686 178 655 L178 638 L141 638 L141 655 C141 665 132 674 120 674 C108 674 99 665 99 655 C99 644 107 637 119 637 L137 637 L137 604 Z" />
+                <path class="hand right-hand" d="M529 604 C558 604 578 626 578 655 C578 686 554 710 521 710 C487 710 462 686 462 655 L462 638 L499 638 L499 655 C499 665 508 674 520 674 C532 674 541 665 541 655 C541 644 533 637 521 637 L503 637 L503 604 Z" />
+
+                <rect class="head-stud" x="276" y="64" width="88" height="56" rx="16" />
+                <rect class="head" x="220" y="102" width="200" height="160" rx="32" />
+                <rect class="head-shine" x="244" y="116" width="72" height="24" rx="12" />
+                <image id="faceImageSvg" x="230" y="112" width="180" height="132" preserveAspectRatio="xMidYMid meet" clip-path="url(#faceClip)" opacity="0" />
+                <g id="defaultFace">
+                  <circle cx="280" cy="172" r="9" />
+                  <circle cx="360" cy="172" r="9" />
+                  <path d="M282 213 Q320 238 358 213" fill="none" stroke="#171717" stroke-width="9" stroke-linecap="round" />
+                </g>
+              </g>
+
+              <path class="hit-area" data-part="shirt" d="M205 300 H435 Q460 300 466 325 L490 545 Q493 575 465 575 H175 Q147 575 150 545 L174 325 Q180 300 205 300 Z" />
+              <rect class="hit-area" data-part="face" x="220" y="102" width="200" height="160" rx="32" ry="32" />
+              <path class="hit-area arm-hit" data-part="arms" d="M151 322 Q96 370 88 492 L80 585 Q77 618 106 629 L154 644 L194 474 L210 306 Z" />
+              <path class="hit-area arm-hit" data-part="arms" d="M489 322 Q544 370 552 492 L560 585 Q563 618 534 629 L486 644 L446 474 L430 306 Z" />
+              <rect class="hit-area" data-part="waist" x="178" y="575" width="284" height="57" rx="8" ry="8" />
+              <path class="hit-area" data-part="pants" d="M168 632 H306 V816 H168 Z M334 632 H472 V816 H334 Z" />
+              <path class="hit-area" data-part="feet" d="M146 800 H306 V860 H146 Z M334 800 H494 V860 H334 Z" />
+
+              <g class="transform-controls hidden" id="imageTransformControls">
+                <g id="transformBox">
+                  <rect class="control-move" id="controlMoveArea" x="150" y="300" width="340" height="275" />
+                  <rect class="control-outline" id="controlOutline" x="150" y="300" width="340" height="275" />
+                  <line class="rotate-line" id="rotateLine" x1="320" y1="300" x2="320" y2="260" />
+                  <circle class="rotate-handle" id="rotateHandle" cx="320" cy="250" r="22" />
+                  <rect class="resize-handle" data-corner="tl" x="129" y="279" width="42" height="42" rx="6" />
+                  <rect class="resize-handle" data-corner="tr" x="469" y="279" width="42" height="42" rx="6" />
+                  <rect class="resize-handle" data-corner="bl" x="129" y="554" width="42" height="42" rx="6" />
+                  <rect class="resize-handle" data-corner="br" x="469" y="554" width="42" height="42" rx="6" />
+                  <circle class="remove-handle" id="removeImageHandle" cx="490" cy="300" r="21" />
+                  <path class="remove-icon" id="removeImageIcon" d="M482 292 L498 308 M498 292 L482 308" />
+                </g>
+              </g>
+            </svg>
+            <input class="file-input" id="shirtUpload" type="file" accept="image/*" />
+            <input class="file-input" id="faceUpload" type="file" accept="image/*" />
+
+            <div class="editor-popover hidden" id="editorPopover">
+              <div class="popover-header">
+                <h2 id="panelTitle">Editar calca</h2>
+                <button class="icon-button" id="closePopover" type="button" aria-label="Fechar">x</button>
+              </div>
+
+              <div class="control-group" id="pantsControls">
+                <span>Tipo</span>
+                <div class="segmented-control" role="group" aria-label="Tipo de roupa da perna">
+                  <button class="segment-button active" id="pantsModeButton" type="button">Calca</button>
+                  <button class="segment-button" id="shortsModeButton" type="button">Bermuda</button>
+                </div>
+                <span>Cor da calca</span>
+                <div class="swatches" id="swatches"></div>
+                <label class="color-row">
+                  <span>Cor livre</span>
+                  <input id="pantsPicker" type="color" value="#0b59d1" />
+                </label>
+              </div>
+
+              <div class="control-group hidden" id="waistControls">
+                <span>Cor da cintura</span>
+                <div class="swatches" id="waistSwatches"></div>
+                <label class="color-row">
+                  <span>Cor livre</span>
+                  <input id="waistPicker" type="color" value="#0b59d1" />
+                </label>
+              </div>
+
+              <div class="control-group hidden" id="feetControls">
+                <span>Cor dos pes</span>
+                <div class="swatches" id="feetSwatches"></div>
+                <label class="color-row">
+                  <span>Cor livre</span>
+                  <input id="feetPicker" type="color" value="#0745a8" />
+                </label>
+              </div>
+
+              <div class="control-group hidden" id="armsControls">
+                <span>Tipo de manga</span>
+                <div class="segmented-control" role="group" aria-label="Tipo de manga">
+                  <button class="segment-button active" id="shortSleeveButton" type="button">Curta</button>
+                  <button class="segment-button" id="longSleeveButton" type="button">Longa</button>
+                </div>
+                <span>Cor da manga</span>
+                <div class="swatches" id="armSwatches"></div>
+                <label class="color-row">
+                  <span>Cor livre</span>
+                  <input id="armsPicker" type="color" value="#d72d16" />
+                </label>
+              </div>
+
+              <div class="control-group hidden" id="shirtControls">
+                <span>Imagem da camiseta</span>
+                <div class="button-row">
+                  <button class="ghost-button" id="resetShirtImage" type="button">Centralizar</button>
+                  <button class="ghost-button" id="clearShirt" type="button">Limpar</button>
+                </div>
+              </div>
+
+              <div class="control-group hidden" id="faceControls">
+                <span>Imagem do rosto</span>
+                <div class="button-row">
+                  <button class="ghost-button" id="resetFaceImage" type="button">Centralizar</button>
+                  <button class="ghost-button" id="clearFace" type="button">Limpar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
