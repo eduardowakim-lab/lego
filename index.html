@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Personalizador Lego</title>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -62,7 +62,9 @@
                 <path class="arm right-arm" d="M489 322 Q522 350 535 407 L541 453 L476 470 L446 474 L430 306 Z" />
 
                 <path id="shirtTint" d="M205 300 H435 Q460 300 466 325 L490 545 Q493 575 465 575 H175 Q147 575 150 545 L174 325 Q180 300 205 300 Z" />
-                <image id="shirtImageSvg" x="150" y="300" width="340" height="275" preserveAspectRatio="xMidYMid meet" clip-path="url(#shirtClip)" opacity="0" />
+                <g id="shirtImageClipGroup" clip-path="url(#shirtClip)">
+                  <image id="shirtImageSvg" x="150" y="300" width="340" height="275" preserveAspectRatio="xMidYMid meet" opacity="0" />
+                </g>
                 <path class="shirt-shine" d="M205 300 H435 Q460 300 466 325 L490 545 Q493 575 465 575 H175 Q147 575 150 545 L174 325 Q180 300 205 300 Z" />
 
                 <path id="waistColor" d="M178 575 H462 V632 H178 Z" />
@@ -80,7 +82,9 @@
                 <rect class="head-stud" x="276" y="64" width="88" height="56" rx="16" />
                 <rect class="head" x="220" y="102" width="200" height="160" rx="32" />
                 <rect class="head-shine" x="244" y="116" width="72" height="24" rx="12" />
-                <image id="faceImageSvg" x="230" y="112" width="180" height="132" preserveAspectRatio="xMidYMid meet" clip-path="url(#faceClip)" opacity="0" />
+                <g id="faceImageClipGroup" clip-path="url(#faceClip)">
+                  <image id="faceImageSvg" x="230" y="112" width="180" height="132" preserveAspectRatio="xMidYMid meet" opacity="0" />
+                </g>
                 <g id="defaultFace">
                   <circle cx="280" cy="172" r="9" />
                   <circle cx="360" cy="172" r="9" />

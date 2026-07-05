@@ -64,6 +64,7 @@ const resetFaceImage = document.querySelector('#resetFaceImage');
 const savePdfButton = document.querySelector('#savePdfButton');
 const resetButton = document.querySelector('#resetButton');
 const figureSvg = document.querySelector('.figure-svg');
+const stage = document.querySelector('#stage');
 const transformControls = document.querySelector('#imageTransformControls');
 const transformBox = document.querySelector('#transformBox');
 const controlMoveArea = document.querySelector('#controlMoveArea');
@@ -384,6 +385,16 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function stopPageGesture(event) {
+  if (!event.cancelable) return;
+  event.preventDefault();
+}
+
+function stopStageTouchZoom(event) {
+  if (!event.cancelable || event.touches.length < 2) return;
+  event.preventDefault();
+}
+
 function pointerPairMetrics() {
   const points = Array.from(activePointers.values());
   if (points.length < 2) return null;
@@ -480,7 +491,7 @@ function updateTransformDrag(event) {
     const state = imageState[activeImagePart];
     state.x = activeGesture.startX + metrics.center.x - activeGesture.startCenter.x;
     state.y = activeGesture.startY + metrics.center.y - activeGesture.startCenter.y;
-    state.scale = clamp(activeGesture.startScale * (metrics.distance / activeGesture.startDistance), 0.35, 3);
+    state.scale = clamp(activeGesture.startScale * (metrics.distance / activeGesture.startDistance), 0.35, 2.4);
     state.rotate = activeGesture.startRotate + metrics.angle - activeGesture.startAngle;
     applyImageTransform(activeImagePart);
     return;
@@ -497,7 +508,7 @@ function updateTransformDrag(event) {
 
   if (activeDrag.mode === 'scale') {
     const distance = pointerDistance(point, activeDrag.center);
-    state.scale = clamp(activeDrag.startScale * (distance / activeDrag.startDistance), 0.35, 3);
+    state.scale = clamp(activeDrag.startScale * (distance / activeDrag.startDistance), 0.35, 2.4);
   }
 
   if (activeDrag.mode === 'rotate') {
@@ -557,7 +568,7 @@ function printStickerSvg(part) {
     ? `<rect x="230" y="112" width="180" height="132" rx="28" ry="28" />`
     : `<path d="M${shirtTopLeft.toFixed(2)} 300 H${shirtTopRight.toFixed(2)} L490 575 H150 Z" />`;
   const imageTag = imageHref
-    ? `<image href="${imageHref}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet" transform="${imageTransform}" clip-path="url(#${clipId})" />`
+    ? `<g clip-path="url(#${clipId})"><image href="${imageHref}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="xMidYMid meet" transform="${imageTransform}" /></g>`
     : '';
 
   return `
@@ -771,6 +782,11 @@ resizeHandles.forEach((handle) => {
 figureSvg.addEventListener('pointermove', updateTransformDrag);
 figureSvg.addEventListener('pointerup', stopTransformDrag);
 figureSvg.addEventListener('pointercancel', stopTransformDrag);
+stage.addEventListener('touchstart', stopStageTouchZoom, { passive: false });
+stage.addEventListener('touchmove', stopStageTouchZoom, { passive: false });
+document.addEventListener('gesturestart', stopPageGesture, { passive: false });
+document.addEventListener('gesturechange', stopPageGesture, { passive: false });
+document.addEventListener('gestureend', stopPageGesture, { passive: false });
 
 resetButton.addEventListener('click', () => {
   clearImage('shirt', shirtUpload);
